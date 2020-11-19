@@ -1,6 +1,6 @@
 % Read IMU *.bin files
 
-function [IMU] = Read_IMU_bin(filename)
+function [IMU] = Read_IMU_bin(filename,site)
 
 % Read the raw *.bin files for IMU files
 % Written by: R Krishnamurthy, PNNL
@@ -25,27 +25,63 @@ fileID = fopen(filename,'r','ieee-be');
 % Packet descriptor, fdescriptors and certain flags are not saved
 
 i=1; % counter
-while(~feof(fileID))
-    
-    h1 = fread(fileID,4,'*ubit8'); % Header information
-    if(~isempty(h1))
-        g1 = fread(fileID,2,'*ubit8');% Packet_descriptor and fdescriptor for time
-        IMU.tow(i) = fread(fileID,1,'double');
-        IMU.week_number(i)  = fread(fileID,1,'uint16');
-        IMU.flag(i)  = fread(fileID,1,'uint16');
-        g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for rpy
-        IMU.rpy(i,1:3) = fread(fileID,3,'single');
-        g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for gyro
-        IMU.gyro(i,1:3) = fread(fileID,3,'single');
-        g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for accel
-        IMU.accel(i,1:3) = fread(fileID,3,'single');
-        g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for mag
-        IMU.mag(i,1:3) = fread(fileID,3,'single');
-        g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for pres
-        IMU.pressure(i,1:3) = fread(fileID,1,'single');
-        g1 = fread(fileID,2,'*ubit8'); % checksum
-        i = i +1; % next packet
+if(strcmp(site,'Morro Bay'))
+    while(~feof(fileID))
+
+        h1 = fread(fileID,4,'*ubit8'); % Header information
+        if(~isempty(h1))
+            g1 = fread(fileID,2,'*ubit8');% Packet_descriptor and fdescriptor for time
+            IMU.tow(i) = fread(fileID,1,'double');
+            IMU.week_number(i)  = fread(fileID,1,'uint16');
+            IMU.flag(i)  = fread(fileID,1,'uint16');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for rpy
+            IMU.rpy(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for gyro
+            IMU.gyro(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for accel
+            IMU.accel(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for mag
+            IMU.mag(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for pres
+            IMU.pressure(i,1) = fread(fileID,1,'single');
+            g1 = fread(fileID,2,'*ubit8'); % checksum
+            i = i +1; % next packet
+        end
     end
+elseif (strcmp(site,'Humboldt'))
+    % Issue with this file, it repeats the time stamp at the end of the
+    % regular data AGAIN.  Hence has more bits than that observed in Morro
+    % Bay
+    while(~feof(fileID))
+
+        h1 = fread(fileID,4,'*ubit8'); % Header information
+        if(~isempty(h1))
+            g1 = fread(fileID,2,'*ubit8');% Packet_descriptor and fdescriptor for time
+            IMU.tow(i) = fread(fileID,1,'double');
+            IMU.week_number(i)  = fread(fileID,1,'uint16');
+            IMU.flag(i)  = fread(fileID,1,'uint16');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for rpy
+            IMU.rpy(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for gyro
+            IMU.gyro(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for accel
+            IMU.accel(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for mag
+            IMU.mag(i,1:3) = fread(fileID,3,'single');
+            g1 = fread(fileID,2,'*ubit8'); % Packet_descriptor and fdescriptor for pres
+            IMU.pressure(i,1) = fread(fileID,1,'single');
+            g1 = fread(fileID,2,'*ubit8');% Packet_descriptor and fdescriptor for time
+            IMU.tow(i) = fread(fileID,1,'double');
+            IMU.week_number(i)  = fread(fileID,1,'uint16');
+            IMU.flag(i)  = fread(fileID,1,'uint16');
+            g1 = fread(fileID,2,'*ubit8'); % checksum
+            i = i +1; % next packet
+        end
+    end
+    
+    
+    
+    
 end
 clear g1 h1 i
 %% Close the file
@@ -56,7 +92,7 @@ fclose(fileID);
 Num_days = IMU.week_number*7;
 curr_day = datenum(1980,1,6,0,0,0) + Num_days;
 curr_vec = datevec(curr_day);
-GPS_time = datenum(curr_vec(:,1),curr_vec(:,2),curr_vec(:,3),0,0,IMU.tow);
+GPS_time = datenum(curr_vec(:,1),curr_vec(:,2),curr_vec(:,3),0,0,IMU.tow(:));
 IMU.mtime = gps2utc(GPS_time); % UTC Time
 
 function date1 = gps2utc(date0)
