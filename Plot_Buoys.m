@@ -9,7 +9,7 @@ function [] = Plot_Buoys(direc_buoy, direc_lidar, direc_move,site, OutputDir, zi
 % OutputDir = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\Figures\'; % Daily Figure Folders for each day
 % site - location of the buoy data
 % idate = Date to be plotted (matlab format)
-
+warning off
 mkdir(OutputDir); % Create the director if does not exist
 
 %% Plot surface met characteristics
@@ -42,15 +42,28 @@ ind_cup = find(date_cup_mat == idate);
 % Read the data
 if(~isempty(ind_cup))
     disp(['Reading the Cup Anemometer file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-    winds = Read_winds_AXYS([direc_buoy dircon_cup(ind_cup).name]);
+    filename = [direc_buoy dircon_cup(ind_cup).name];
+    winds_temp = abs(txt2mat(filename)); % For compatability with 2016b
+    winds.HWSAvg = winds_temp(:,7); % Wind Speed
+    winds.HWSDir = winds_temp(:,8); % Wind Direction
+    winds.Datetime = datetime(winds_temp(:,1),winds_temp(:,2),winds_temp(:,3),winds_temp(:,4),winds_temp(:,5),winds_temp(:,6));
+%     winds = Read_winds_AXYS([direc_buoy dircon_cup(ind_cup).name]);
 else
     disp(['No cup dataset available on - ' datestr(idate)])
 end
 
 if(~isempty(ind_gill))
     disp(['Reading the Gill Sonic file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-
-    Gill = Read_Gill_avg([direc_buoy dircon_gill(ind_gill).name]);
+    filename = [direc_buoy dircon_gill(ind_gill).name];
+    Gill_temp = abs(txt2mat(filename)); % For compatability with 2016b
+    Gill.HWSAvg = Gill_temp(:,7);% Wind Speed
+    try
+        Gill.HWSDir = Gill_temp(:,9);% Wind Direction
+    catch
+        Gill.HWSDir = Gill_temp(:,8);% Wind Direction if Gust data is not available
+    end
+    Gill.Datetime = datetime(Gill_temp(:,1),Gill_temp(:,2),Gill_temp(:,3),Gill_temp(:,4),Gill_temp(:,5),Gill_temp(:,6));
+%     Gill = Read_Gill_avg([direc_buoy dircon_gill(ind_gill).name]);
 else
     disp(['No Gill Sonic dataset available on - ' datestr(idate)])
     
@@ -72,10 +85,11 @@ if(~isempty(ind_cup))
     legend(["$\rm \bar U\ Cup$" "$\rm \bar \theta\ Cup$"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w')
     title({['Surface Met at ' site ' on ' datestr(winds.Datetime(1),'yyyy/mm/dd')], ""},'Fontsize',14,'Interpreter','latex')
     
-%     % Move the processed data into an Archive Folder on Lidar-buoy share drive
-%     direc_wind_file = [direc_buoy dircon_cup(ind_cup).name];
-%     movefile(direc_wind_file,[direc_move 'buoy\']);
-    
+    if(direc_move ~= 'x')
+        % Move the processed data into an Archive Folder on Lidar-buoy share drive
+        direc_wind_file = [direc_buoy dircon_cup(ind_cup).name];
+        movefile(direc_wind_file,[direc_move 'buoy\']);
+    end
     
 end
 
@@ -135,8 +149,11 @@ ind_pres = find(date_pres_mat == idate);
 % Read the data
 if(~isempty(ind_pres))
     disp(['Reading the Pressure file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-
-    Pres = Read_Pres_AXYS([direc_buoy dircon_pres(ind_pres).name]);
+    filename = [direc_buoy dircon_pres(ind_pres).name];
+    P_temp = abs(txt2mat(filename)); % For compatability with 2016b
+    Pres.PresAvg = P_temp(:,7);% Pressure
+    Pres.Datetime = datetime(P_temp(:,1),P_temp(:,2),P_temp(:,3),P_temp(:,4),P_temp(:,5),P_temp(:,6));
+%     Pres = Read_Pres_AXYS([direc_buoy dircon_pres(ind_pres).name]);
     if(direc_move ~= 'x')
         % Move the processed data into an Archive Folder on Lidar-buoy share drive
         direc_pres_file = [direc_buoy dircon_pres(ind_pres).name];
@@ -148,8 +165,11 @@ else
 end
 if(~isempty(ind_rh))
     disp(['Reading the RH file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-
-    rh = Read_RH_AXYS([direc_buoy dircon_rh(ind_rh).name]);
+    filename = [direc_buoy dircon_rh(ind_rh).name];
+    RH_temp = abs(txt2mat(filename)); % For compatability with 2016b
+    rh.RH = RH_temp(:,7);% Relative Humidity
+    rh.Datetime = datetime(RH_temp(:,1),RH_temp(:,2),RH_temp(:,3),RH_temp(:,4),RH_temp(:,5),RH_temp(:,6));
+%     rh = Read_RH_AXYS([direc_buoy dircon_rh(ind_rh).name]);
     if(direc_move ~= 'x')
         % Move the processed data into an Archive Folder on Lidar-buoy share drive
         direc_rh_file = [direc_buoy dircon_rh(ind_rh).name];
@@ -220,8 +240,12 @@ end
 
 if(~isempty(ind_temp))
     disp(['Reading the Temperature file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-
-    temp = Read_temp_AXYS([direc_buoy dircon_temp(ind_temp).name]);
+    filename = [direc_buoy dircon_temp(ind_temp).name];
+    T_temp = (txt2mat(filename)); % For compatability with 2016b
+    temp.TempAvg = T_temp(:,7);% Relative Humidity
+    temp.Datetime = datetime(T_temp(:,1),abs(T_temp(:,2)),abs(T_temp(:,3)),T_temp(:,4),T_temp(:,5),T_temp(:,6));
+    clear T_temp
+%     temp = Read_temp_AXYS([direc_buoy dircon_temp(ind_temp).name]);
     if(direc_move ~= 'x')
         % Move the processed data into an Archive Folder on Lidar-buoy share drive
         direc_temp_file = [direc_buoy dircon_temp(ind_temp).name];
@@ -234,8 +258,12 @@ end
 
 if(~isempty(ind_sst))
     disp(['Reading the SST file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-
-    SST = Read_sst_AXYS([direc_buoy dircon_sst(ind_sst).name]);
+    
+    filename = [direc_buoy dircon_sst(ind_sst).name];
+    T_temp = (txt2mat(filename)); % For compatability with 2016b
+    SST.SST = T_temp(:,7);% Relative Humidity
+    SST.Datetime = datetime(T_temp(:,1),abs(T_temp(:,2)),abs(T_temp(:,3)),T_temp(:,4),T_temp(:,5),T_temp(:,6));
+%     SST = Read_sst_AXYS([direc_buoy dircon_sst(ind_sst).name]);
     if(direc_move ~= 'x')
         % Move the processed data into an Archive Folder on Lidar-buoy share drive
         direc_sst_file = [direc_buoy dircon_sst(ind_sst).name];
@@ -298,9 +326,18 @@ end
 ind_waves = find(date_waves_mat == idate);
 
 if(~isempty(ind_waves))
-   disp(['Reading the Waves file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-
-    Waves = Read_waves_AXYS([direc_buoy dircon_waves(ind_waves).name]);
+   disp(['Reading the Waves file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])   
+   filename = [direc_buoy dircon_waves(ind_waves).name];
+   Waves_temp = (txt2mat(filename)); % For compatability with 2016b
+   Waves.Datetime = datetime(Waves_temp(:,1),abs(Waves_temp(:,2)),abs(Waves_temp(:,3)),Waves_temp(:,4),Waves_temp(:,5),Waves_temp(:,6));
+   Waves.Havg = Waves_temp(:,9);
+   Waves.Hsig = Waves_temp(:,12);
+   Waves.Hmax = Waves_temp(:,11);
+   Waves.Tavg = Waves_temp(:,10);
+   Waves.Tsig = Waves_temp(:,13);
+   Waves.MeanPeriod = Waves_temp(:,16);
+   Waves.MeanDirection = Waves_temp(:,17);
+%     Waves = Read_waves_AXYS([direc_buoy dircon_waves(ind_waves).name]);
 
     % Plot the data
     % Significant wave height
@@ -381,8 +418,14 @@ ind_cond = find(date_cond_mat == idate);
 
 if(~isempty(ind_cond))
     disp(['Reading the Conductivity file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+    
+    filename = [direc_buoy dircon_cond(ind_cond).name];
+    cond_temp = abs(txt2mat(filename)); % For compatability with 2016b
+    coductivity.ConductivitySiemensm = cond_temp(:,8); % Wind Speed
+    coductivity.SurfaceTemperatureC = cond_temp(:,7); % Wind Direction
+    coductivity.Datetime = datetime(cond_temp(:,1),cond_temp(:,2),cond_temp(:,3),cond_temp(:,4),cond_temp(:,5),cond_temp(:,6));
 
-    coductivity = Read_conduc_AXYS([direc_buoy dircon_cond(ind_cond).name]);
+%     coductivity = Read_conduc_AXYS([direc_buoy dircon_cond(ind_cond).name]);
     
     figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
     yyaxis left
@@ -430,25 +473,35 @@ ind_curr = find(date_curr_mat == idate);
 
 if(~isempty(ind_curr))
     disp(['Reading the Ocean Currents file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+    filename = [direc_buoy dircon_curr(ind_curr).name];
+    ctemp = txt2mat(filename);
+    currents.vel = ctemp(:,11:2:end);
+    currents.direc = ctemp(:,12:2:end);
+    currents.binsize = ctemp(:,8);
+    currents.blankdist = ctemp(:,10);
+    currents.Nobins = ctemp(:,7);
+    currents.Datetime = datetime(ctemp(:,1),abs(ctemp(:,2)),abs(ctemp(:,3)),ctemp(:,4),ctemp(:,5),ctemp(:,6));
 
-    currents = Read_currents_AXYS([direc_buoy dircon_curr(ind_curr).name]);
+    Range = currents.blankdist + currents.binsize*(1:currents.Nobins);
     
-    vel = currents{:,6:2:end};
-    direc = currents{:,7:2:end};
-    binsize = nanmedian(currents{:,3});
-    blankdist = nanmedian(currents{:,5});
-    HeadDepth = nanmedian(currents{:,4});
-    Nobins = nanmedian(currents{:,2});
-    Range = blankdist + binsize*(1:Nobins);
+%     currents = Read_currents_AXYS([direc_buoy dircon_curr(ind_curr).name]);
+    
+%     vel = currents{:,6:2:end};
+%     direc = currents{:,7:2:end};
+%     binsize = nanmedian(currents{:,3});
+%     blankdist = nanmedian(currents{:,5});
+%     HeadDepth = nanmedian(currents{:,4});
+%     Nobins = nanmedian(currents{:,2});
+%     Range = blankdist + binsize*(1:Nobins);
     
     % Filter the data
-    direc(vel > 2000) = NaN;
-    vel(vel > 2000) = NaN;
+    currents.direc(currents.vel > 2000) = NaN;
+    currents.vel(currents.vel > 2000) = NaN;
     
     
     figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
     subplot(2,1,1)
-    pcolor(currents.Datetime,-Range,vel')
+    pcolor(currents.Datetime,-Range(1,:),currents.vel')
     c = colorbar;
     c.Label.String = '$\rm Current\ Velocity\ (mm\ s^{-1})$';
     c.Label.Interpreter = 'latex';
@@ -465,7 +518,7 @@ if(~isempty(ind_curr))
     legend(["$\rm Current\ Velocity\ (mm\ s^{-1})$"],'Interpreter','Latex','Location','southwest','Orientation','Horizontal','EdgeColor','w','FontSize',14)
     
     subplot(2,1,2)
-    pcolor(currents.Datetime,-Range,direc')
+    pcolor(currents.Datetime,-Range(1,:),currents.direc')
     
     c = colorbar;
     c.Label.String = '$\rm Current\ Direction\ (deg)$';
@@ -774,7 +827,12 @@ ind_gps = find(date_gps_mat == idate); % These files are 30-min files - so shoul
 if(~isempty(ind_gps))
     disp(['Reading the GPS file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
     filename = [direc_buoy direc_gps(ind_gps).name];
-    GPS = Read_GPS_AXYS(filename);
+    GPS_temp = txt2mat(filename);
+    GPS.Long = GPS_temp(:,8); % Wind Speed
+    GPS.Lat = GPS_temp(:,7); % Wind Direction
+    GPS.Datetime = datetime(GPS_temp(:,1),GPS_temp(:,2),GPS_temp(:,3),GPS_temp(:,4),GPS_temp(:,5),GPS_temp(:,6));
+
+%     GPS = Read_GPS_AXYS(filename);
     
     % Plot the location of the buoy on USA map
     figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
