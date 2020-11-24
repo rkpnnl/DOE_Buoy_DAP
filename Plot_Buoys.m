@@ -35,8 +35,19 @@ for i = 1:length(dircon_cup)
     date_cup_mat(i) = datenum(str2num(date_cup(1:4)),str2num(date_cup(5:6)),str2num(date_cup(7:8)),0,0,0);
 end
 
-ind_gill = find(date_gill_mat == idate);
-ind_cup = find(date_cup_mat == idate);
+if(~isempty(date_gill_mat))
+    ind_gill = find(date_gill_mat == idate);
+else
+    ind_gill = [];
+    disp(['Folder - ' direc_buoy ' - has no Gill data on ' datestr(idate)])
+end
+if(~isempty(date_cup_mat))
+    ind_cup = find(date_cup_mat == idate);
+else
+    ind_cup = [];
+    disp(['Folder - ' direc_buoy ' - has no Cup data on ' datestr(idate)])
+
+end
 
 
 % Read the data
@@ -143,8 +154,19 @@ for i = 1:length(dircon_pres)
     date_pres_mat(i) = datenum(str2num(date_cup(1:4)),str2num(date_cup(5:6)),str2num(date_cup(7:8)),0,0,0);
 end
 
-ind_rh = find(date_rh_mat == idate);
-ind_pres = find(date_pres_mat == idate);
+if(~isempty(date_rh_mat))
+    ind_rh = find(date_rh_mat == idate);
+else
+    ind_rh = [];
+    disp(['Folder - ' direc_buoy ' - has no RH data on ' datestr(idate)])
+
+end
+if(~isempty(date_pres_mat))
+    ind_pres = find(date_pres_mat == idate);
+else
+    ind_pres = [];
+    disp(['Folder - ' direc_buoy ' - has no Pressure data on ' datestr(idate)])
+end
 
 % Read the data
 if(~isempty(ind_pres))
@@ -211,6 +233,7 @@ end
 
 % Plot Air Temperature, & Sea Surface Temperature
 % Subplot 3
+
 dircon_temp = dir([direc_buoy '*.temperature.csv']);
 dircon_sst = dir([direc_buoy '*.surfacetemp.csv']);
 
@@ -230,8 +253,11 @@ for i = 1:length(dircon_sst)
     % convert to matlab time
     date_sst_mat(i) = datenum(str2num(date_cup(1:4)),str2num(date_cup(5:6)),str2num(date_cup(7:8)),0,0,0);
 end
-
-ind_temp = find(date_temp_mat == idate);
+if(~isempty(date_temp_mat))
+    ind_temp = find(date_temp_mat == idate);
+else
+    ind_temp = [];
+end
 if(~isempty(dircon_sst))
     ind_sst = find(date_sst_mat == idate);
 else
@@ -307,8 +333,12 @@ end
 
 disp(['Saving the Met Figure from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
 % Save the figure
-fig_filename = [OutputDir dircon_cup(end).name(1:end-4) '.rh.pressure.airtemp.sst.jpg'];
-saveas(gcf,fig_filename,'jpeg')
+try
+    fig_filename = [OutputDir dircon_cup(end).name(1:end-4) '.rh.pressure.airtemp.sst.jpg'];
+    saveas(gcf,fig_filename,'jpeg')
+catch
+    disp(['No data available on - ' datestr(idate)]);
+end
 close(gcf)
 
 
@@ -323,7 +353,11 @@ for i = 1:length(dircon_waves)
     date_waves_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
 
-ind_waves = find(date_waves_mat == idate);
+if(~isempty(date_waves_mat))
+    ind_waves = find(date_waves_mat == idate);
+else
+    ind_waves = [];
+end
 
 if(~isempty(ind_waves))
    disp(['Reading the Waves file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])   
@@ -400,7 +434,8 @@ if(~isempty(ind_waves))
     fig_filename = [OutputDir dircon_waves(ind_waves).name(1:end-4) '.height.period.direction.jpg'];
     saveas(gcf,fig_filename,'jpeg')
     close(gcf)
-
+else
+    disp(['No Wave sensor dataset available on - ' datestr(idate)])
 end
 
 %% Plot Conductivity
@@ -414,7 +449,11 @@ for i = 1:length(dircon_cond)
     date_cond_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
 
-ind_cond = find(date_cond_mat == idate);
+if(~isempty(date_cond_mat))
+    ind_cond = find(date_cond_mat == idate);
+else
+    ind_cond = [];
+end
 
 if(~isempty(ind_cond))
     disp(['Reading the Conductivity file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
@@ -455,7 +494,8 @@ if(~isempty(ind_cond))
     fig_filename = [OutputDir dircon_waves(ind_cond).name(1:end-4) '.conductivity.sst.jpg'];
     saveas(gcf,fig_filename,'jpeg')
     close(gcf)
-    
+else
+    disp(['No Conductivity dataset available on - ' datestr(idate)])
 end
 
 %% Plot Currents
@@ -469,7 +509,11 @@ for i = 1:length(dircon_curr)
     date_curr_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
 
-ind_curr = find(date_curr_mat == idate);
+if(~isempty(date_curr_mat))
+    ind_curr = find(date_curr_mat == idate);
+else
+    ind_curr = [];
+end
 
 if(~isempty(ind_curr))
     disp(['Reading the Ocean Currents file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
@@ -547,6 +591,8 @@ if(~isempty(ind_curr))
     fig_filename = [OutputDir dircon_curr(ind_curr).name(1:end-4) '.velocity.direction.jpg'];
     saveas(gcf,fig_filename,'jpeg')
     close(gcf)
+else
+    disp(['No Ocean Current dataset available on - ' datestr(idate)])
 end
 
 %% Plot the lidar data
@@ -560,7 +606,13 @@ for i = 1:length(direc_lidar_sta)
     date_lidsta_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
 
-ind_lid = find(date_lidsta_mat == idate);
+if(~isempty(date_lidsta_mat))
+    ind_lid = find(date_lidsta_mat == idate);
+else
+    ind_lid = [];
+    disp(['Folder -' direc_lidar ' does not have any Lidar data on ' datestr(idate)])
+end
+
 
 if(~isempty(ind_lid))
     disp(['Reading the Lidar file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
@@ -704,7 +756,8 @@ if(~isempty(ind_lid))
     fig_filename = [OutputDir direc_lidar_sta(ind_lid).name(1:end-3) '.Winds.Hub.Heights.jpg'];
     saveas(gcf,fig_filename,'jpeg')
     close(gcf)
-    
+else
+    disp(['No Lidar dataset available on - ' datestr(idate)]) 
 end
 
 
@@ -724,7 +777,13 @@ for i = 1:length(direc_gnss_bin)
     date_gnss_mat(i) = datenum(str2num(date_gnss(1:4)),str2num(date_gnss(5:6)),str2num(date_gnss(7:8)),0,0,0);
 end
 
-ind_imu = find(date_gnss_mat == idate); % These files are 30-min files - so should have atleast 24*2 files on a given day
+if(~isempty(date_gnss_mat))
+    ind_imu = find(date_gnss_mat == idate); % These files are 30-min files - so should have atleast 24*2 files on a given day
+else
+    ind_imu = [];
+    disp(['Folder -' direc_buoy ' does not have any IMU data on ' datestr(idate)])
+
+end
 
 if(~isempty(ind_imu))
 %     No_samples = [];Time = [];GNSS_all = [];
@@ -788,7 +847,7 @@ if(~isempty(ind_imu))
         saveas(gcf,fig_filename,'jpeg')
         close(gcf)
         
-%         % Keep sample count
+%         % Keep track of sample count
 %         No_samples = [No_samples length(IMU.mtime)];
 %         Time = [Time IMU.mtime(1)];
 %         GNSS_all = [GNSS_all [GNSS.position(1,1),GNSS.position(1,2)]];
@@ -805,7 +864,8 @@ if(~isempty(ind_imu))
         end
         
     end % for loop
-   
+else
+    disp(['No GX5-45 IMU dataset available on - ' datestr(idate)]) 
 end % if statement
 
 
@@ -822,7 +882,12 @@ for i = 1:length(direc_gps)
     date_gps_mat(i) = datenum(str2num(date_gps(1:4)),str2num(date_gps(5:6)),str2num(date_gps(7:8)),0,0,0);
 end
 
-ind_gps = find(date_gps_mat == idate); % These files are 30-min files - so should have atleast 24*2 files on a given day
+if(~isempty(date_gps_mat))
+    ind_gps = find(date_gps_mat == idate); % These files are 30-min files - so should have atleast 24*2 files on a given day
+else
+    ind_gps = [];
+    disp(['Folder -' direc_buoy ' does not have any GPS data on ' datestr(idate)])
+end
 
 if(~isempty(ind_gps))
     disp(['Reading the GPS file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
@@ -859,6 +924,8 @@ if(~isempty(ind_gps))
         movefile(direc_gps_file,[direc_move 'buoy\']);
         disp(['Moving the GPS file to Buoy archive for ' site ' on ' datestr(idate,'yyyy/mm/dd')])
     end
+else
+    disp(['No GPS dataset available on - ' datestr(idate)])    
 end
 % Calculate turbulence using advaned corrections from new IMU - Later!
 
