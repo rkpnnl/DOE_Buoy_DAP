@@ -59,7 +59,7 @@ fclose(fileID);
 Num_days = GNSS.week_number*7;
 curr_day = datenum(1980,1,6,0,0,0) + Num_days;
 curr_vec = datevec(curr_day);
-GPS_time = datenum(curr_vec(:,1),curr_vec(:,2),curr_vec(:,3),0,0,GNSS.tow);
+GPS_time = datenum(curr_vec(:,1),curr_vec(:,2),curr_vec(:,3),0,0,GNSS.tow(:));
 GNSS.mtime = gps2utc(GPS_time); % UTC Time
 
 function date1 = gps2utc(date0)
