@@ -20,14 +20,14 @@ dircon_gill = dir([direc_buoy '*.gill.csv']);
 dircon_cup = dir([direc_buoy '*.wind.csv']);
 
 % Pick the relevant file from the input date
-
+date_gill_mat = [];
 for i = 1:length(dircon_gill)
     ind_gill = find(dircon_gill(i).name == '.');
     date_gill = dircon_gill(i).name(ind_gill(3)+1:ind_gill(4)-1); % string
     % convert to matlab time
     date_gill_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
-
+date_cup_mat = [];
 for i = 1:length(dircon_cup)
     ind_cup = find(dircon_cup(i).name == '.');
     date_cup = dircon_cup(i).name(ind_cup(3)+1:ind_cup(4)-1); % string
@@ -46,7 +46,6 @@ if(~isempty(date_cup_mat))
 else
     ind_cup = [];
     disp(['Folder - ' direc_buoy ' - has no Cup data on ' datestr(idate)])
-
 end
 
 
@@ -93,7 +92,7 @@ if(~isempty(ind_cup))
     yyaxis right
     plot(winds.Datetime,winds.HWSDir,'LineWidth',2)
     ylabel("$\rm \bar \theta\ (degrees) $",'Interpreter','Latex')
-    legend(["$\rm \bar U\ Cup$" "$\rm \bar \theta\ Cup$"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w')
+    legend(["$\rm \bar U\ Cup$" "$\rm \bar \theta\ vane$"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w')
     title({['Surface Met at ' site ' on ' datestr(winds.Datetime(1),'yyyy/mm/dd')], ""},'Fontsize',14,'Interpreter','latex')
     
     if(direc_move ~= 'x')
@@ -139,14 +138,14 @@ dircon_pres = dir([direc_buoy '*.pressure.csv']);
 
 
 % Pick the relevant file from the input date
-
+date_rh_mat = [];
 for i = 1:length(dircon_rh)
     ind_gill = find(dircon_rh(i).name == '.');
     date_gill = dircon_rh(i).name(ind_gill(3)+1:ind_gill(4)-1); % string
     % convert to matlab time
     date_rh_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
-
+date_pres_mat = [];
 for i = 1:length(dircon_pres)
     ind_cup = find(dircon_pres(i).name == '.');
     date_cup = dircon_pres(i).name(ind_cup(3)+1:ind_cup(4)-1); % string
@@ -209,7 +208,7 @@ if(~isempty(ind_pres))
 
     yyaxis left
     plot(Pres.Datetime,Pres.PresAvg,'LineWidth',2)
-    ylabel("$\rm \bar P\ (bar) $",'Interpreter','Latex')
+    ylabel("$\rm \bar P\ (mbar) $",'Interpreter','Latex')
     legend(["$\rm Pressure $" ],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w')
 end
 
@@ -239,14 +238,14 @@ dircon_sst = dir([direc_buoy '*.surfacetemp.csv']);
 
 
 % Pick the relevant file from the input date
-
+date_temp_mat = [];
 for i = 1:length(dircon_temp)
     ind_gill = find(dircon_temp(i).name == '.');
     date_gill = dircon_temp(i).name(ind_gill(3)+1:ind_gill(4)-1); % string
     % convert to matlab time
     date_temp_mat(i) = datenum(str2num(date_gill(1:4)),str2num(date_gill(5:6)),str2num(date_gill(7:8)),0,0,0);
 end
-
+date_sst_mat = [];
 for i = 1:length(dircon_sst)
     ind_cup = find(dircon_sst(i).name == '.');
     date_cup = dircon_sst(i).name(ind_cup(3)+1:ind_cup(4)-1); % string
@@ -345,7 +344,7 @@ close(gcf)
 %% Plot Waves data
 dircon_waves = dir([direc_buoy '*.waves.csv']);
 % Pick the relevant file from the input date
-
+date_waves_mat = [];
 for i = 1:length(dircon_waves)
     ind_gill = find(dircon_waves(i).name == '.');
     date_gill = dircon_waves(i).name(ind_gill(3)+1:ind_gill(4)-1); % string
@@ -440,7 +439,7 @@ end
 
 %% Plot Conductivity
 dircon_cond = dir([direc_buoy '*.conductivity.csv']);
-
+date_cond_mat = [];
 % Pick the file
 for i = 1:length(dircon_cond)
     ind_gill = find(dircon_cond(i).name == '.');
@@ -500,7 +499,7 @@ end
 
 %% Plot Currents
 dircon_curr = dir([direc_buoy '*.currents.csv']);
-
+date_curr_mat = [];
 % Pick the file
 for i = 1:length(dircon_curr)
     ind_gill = find(dircon_curr(i).name == '.');
@@ -597,7 +596,7 @@ end
 
 %% Plot the lidar data
 direc_lidar_sta = dir([direc_lidar '*.sta.7z']);
-
+date_lidsta_mat = [];
 % Pick the file
 for i = 1:length(direc_lidar_sta)
     ind_gill = find(direc_lidar_sta(i).name == '.');
@@ -616,146 +615,149 @@ end
 
 if(~isempty(ind_lid))
     disp(['Reading the Lidar file from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-    
-    file_lid_7z = [direc_lidar direc_lidar_sta(ind_lid).name];
-    [~,~] = system(['"' zip_exe '"' ' -y x ' '"' file_lid_7z '"' ' -o' '"' direc_lidar '"']);
-%     [status,cmdout] = system( ['"C:\Program Files\7-Zip\7z.exe" x -o',file_lid_7z,' ',file7z] );
-    
-    file_lid_sta = file_lid_7z(1:end-3);
-    
-    % Read the Lidar data (STA data)
-    Alldata = sta2mat([file_lid_sta]);
-    
-    % Filter the data based on Availability
-    Alldata.Vh(Alldata.Avail < 10) = NaN;
-    Alldata.Dir(Alldata.Avail < 10) = NaN;
-    Alldata.W(Alldata.Avail < 10) = NaN;
-    Alldata.TI(Alldata.Avail < 10) = NaN;
-    
-    
-    % Plot the winds and direction (vectors) (Time x Height)
-    % Plot daily availability plot
-    
-    figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
-    
-    subplot(2,1,1)
-    a1 = size(Alldata.Vh,2); % Number of ranges
-    %%Velocity and direction
-    Um=-Alldata.Vh.*sind(Alldata.Dir);
-    Vm=-Alldata.Vh.*cosd(Alldata.Dir);
-    VVm = Alldata.Vh;
-    
-    %%Normalize Um and Vm
-    for i=1:size(Um,1)
-        for j = 1:size(Um,2)
-            Umn(i,j)=Um(i,j)./norm([Um(i,j) Vm(i,j)]);
-            Vmn(i,j)=Vm(i,j)./norm([Um(i,j) Vm(i,j)]);
-        end
-    end
-    
-    %%create x/y grid 24x60
-    [x,y] = meshgrid(linspace(0,1,size(Alldata.time,1)),linspace(0,1,a1)); % a1 is the range length
-    
-    %%plot Wind speed and wind direction matrix's on xy grid with quiver
-    axis([0 1 0 1])
-    contourf(x,y,VVm',0:1:30);hold on % creates contour colormap with 1m/s increments upto 30 m/s
-    shading flat
-    colormap(brewermap([],'*spectral'))
-    quiver(x(:,1:5:end),y(:,1:5:end),Umn(1:5:end,:)',Vmn(1:5:end,:)',0.5,'color','k','LineWidth',1.5)
-    axis([-0.009 1.012 -0.005 1.005])
-    
-    %%Manipulate Labels
-    nLabelsY=a1; %(60/nLabelsY must be integer NOT float)
-%     yticklabs = cellstr(num2str(Alldata.Range));
-    set(gca,'ytick',linspace(0,2,nLabelsY),'yticklabels',Alldata.Range(1:2:end)) %{yticklabs{1:1:end}})
-    set(gca,'xtick',linspace(0,0.8696,6),'xticklabels',sprintfc('%g',[0:4:23]))
-    caxis([0 15]);
-    xlabel({'UTC\ Hour\ of\ the\ Day'},'Interpreter','latex','FontName','Times New Roman');
-    set(gcf,'color','white')
-    ylabel({'Height\ ASL\ (m)'},'Interpreter','latex','FontName','Times New Roman');
-    c = colorbar;
-    c.Label.String = '$\rm Wind\ Speed\ (ms^{-1})$';
-    c.Label.Interpreter = 'latex';
-    c.TickLabelInterpreter = 'latex';
-    set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
-        'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
-        'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
-    grid off
-    title(['Average wind speed and direction at ' site ' on ' datestr(Alldata.time(1),'dd-mmm-yyyy')],'Fontsize',14,'Interpreter','latex')
-    legend(["$\rm Wind\ Speed\ Contours\ (0.5\ ms^{-1}) $", "$\rm Wind\ Direction (degrees) $"],'Interpreter','Latex','Location','Best','Orientation','Vertical','EdgeColor','w','FontSize',14)
-
-    subplot(2,1,2)
-    plot(Alldata.Range,nanmean(Alldata.Avail),'LineWidth',2,'color','r')
-    set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
-        'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
-        'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
-    grid on
-    xlabel({'$\rm Height\ ASL\ (m)$'},'Interpreter','latex','FontName','Times New Roman');
-    ylabel({'$\rm Availability\ (\%)$'},'Interpreter','latex','FontName','Times New Roman');
-    legend(["$\rm Lidar\ Data\ Availability $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
-
-    if(direc_move ~= 'x')
-        disp(['Moving the Lidar files to archive for ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-        % Move the processed data into an Archive Folder on Lidar-buoy share drive
-        direc_lid_file = [direc_lidar direc_lidar_sta(ind_lid).name]; % Move the 7zip files sta files
-        movefile(direc_lid_file,[direc_move 'Lidar\']);
-    end
-    
-    if(direc_move ~= 'x')
-        % Also move the stdsa, rtd, stdsta
-        direc_lid_file_stdsta = [file_lid_7z(1:end-6) 'stdsta.7z'];
-        movefile(direc_lid_file_stdsta,[direc_move 'Lidar\']);
-
-        direc_lid_file_rtd = [file_lid_7z(1:end-6) 'rtd.7z'];
-        movefile(direc_lid_file_rtd,[direc_move 'Lidar\']);
-
-        direc_lid_file_rtd = [file_lid_7z(1:end-6) 'stdrtd.7z'];
-        movefile(direc_lid_file_rtd,[direc_move 'Lidar\']);
-    end
-    
     try
-        % delete the unzipped sta files
-        delete(file_lid_7z(1:end-3));
-    catch
-        laster
-    end
-    
-    disp(['Saving the Lidar Winds & Direction figure from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+        file_lid_7z = [direc_lidar direc_lidar_sta(ind_lid).name];
+        [~,~] = system(['"' zip_exe '"' ' -y x ' '"' file_lid_7z '"' ' -o' '"' direc_lidar '"']);
+    %     [status,cmdout] = system( ['"C:\Program Files\7-Zip\7z.exe" x -o',file_lid_7z,' ',file7z] );
 
-    % Save the figure
-    fig_filename = [OutputDir direc_lidar_sta(ind_lid).name(1:end-3) '.Winds.Direction.Availability.jpg'];
-    saveas(gcf,fig_filename,'jpeg')
-    close(gcf)
-    
-    
-    % Plot the time series WS at select heights (Time x Height)
-    figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
-    r1 = find(Alldata.Range == 40);
-    r2 = find(Alldata.Range == 90);
-    r3 = find(Alldata.Range == 140);
-    r4 = find(Alldata.Range == 200);
-    
-    plot(Alldata.time,Alldata.Vh(:,[r1 r2 r3 r4]),'Linewidth',2)
-    
-    set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
-        'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
-        'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
-    datetick('x','yyyy-mm-dd HH:MM')
-    xlabel({'$\rm UTC\ Time\ $'},'Interpreter','latex','FontName','Times New Roman');
-    ylabel({'$\rm Wind\ Speed\ (ms^{-1})$'},'Interpreter','latex','FontName','Times New Roman');
-    set(gcf,'color','white')
-    legend(["$\rm 40\ m\ $" "$\rm 90\ m\ $" "$\rm 140\ m\ $" "$\rm 200\ m\ $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
-    
-%     yyaxis right
-%     plot(Alldata.time,Alldata.Dir(:,[r1 r2 r3 r4]),'--','Linewidth',2)
-%     ylabel({'$\rm Wind\ Direction\ (deg)$'},'Interpreter','latex','FontName','Times New Roman');
-%     legend(["$\rm 40\ m\ $" "$\rm 90\ m\ $" "$\rm 140\ m\ $" "$\rm 200\ m\ $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
-    disp(['Saving the Figure Winds at offshore Hub-height from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
-    
-    % Save the figure
-    fig_filename = [OutputDir direc_lidar_sta(ind_lid).name(1:end-3) '.Winds.Hub.Heights.jpg'];
-    saveas(gcf,fig_filename,'jpeg')
-    close(gcf)
+        file_lid_sta = file_lid_7z(1:end-3);
+
+        % Read the Lidar data (STA data)
+        Alldata = sta2mat([file_lid_sta]);
+
+        % Filter the data based on Availability
+        Alldata.Vh(Alldata.Avail < 10) = NaN;
+        Alldata.Dir(Alldata.Avail < 10) = NaN;
+        Alldata.W(Alldata.Avail < 10) = NaN;
+        Alldata.TI(Alldata.Avail < 10) = NaN;
+
+
+        % Plot the winds and direction (vectors) (Time x Height)
+        % Plot daily availability plot
+
+        figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
+
+        subplot(2,1,1)
+        a1 = size(Alldata.Vh,2); % Number of ranges
+        %%Velocity and direction
+        Um=-Alldata.Vh.*sind(Alldata.Dir);
+        Vm=-Alldata.Vh.*cosd(Alldata.Dir);
+        VVm = Alldata.Vh;
+
+        %%Normalize Um and Vm
+        for i=1:size(Um,1)
+            for j = 1:size(Um,2)
+                Umn(i,j)=Um(i,j)./norm([Um(i,j) Vm(i,j)]);
+                Vmn(i,j)=Vm(i,j)./norm([Um(i,j) Vm(i,j)]);
+            end
+        end
+
+        %%create x/y grid 24x60
+        [x,y] = meshgrid(linspace(0,1,size(Alldata.time,1)),linspace(0,1,a1)); % a1 is the range length
+
+        %%plot Wind speed and wind direction matrix's on xy grid with quiver
+        axis([0 1 0 1])
+        contourf(x,y,VVm',0:1:30);hold on % creates contour colormap with 1m/s increments upto 30 m/s
+        shading flat
+        colormap(brewermap([],'*spectral'))
+        quiver(x(:,1:5:end),y(:,1:5:end),Umn(1:5:end,:)',Vmn(1:5:end,:)',0.5,'color','k','LineWidth',1.5)
+        axis([-0.009 1.012 -0.005 1.005])
+
+        %%Manipulate Labels
+        nLabelsY=a1; %(60/nLabelsY must be integer NOT float)
+    %     yticklabs = cellstr(num2str(Alldata.Range));
+        set(gca,'ytick',linspace(0,2,nLabelsY),'yticklabels',Alldata.Range(1:2:end)) %{yticklabs{1:1:end}})
+        set(gca,'xtick',linspace(0,0.8696,6),'xticklabels',sprintfc('%g',[0:4:23]))
+        caxis([0 15]);
+        xlabel({'UTC\ Hour\ of\ the\ Day'},'Interpreter','latex','FontName','Times New Roman');
+        set(gcf,'color','white')
+        ylabel({'Height\ ASL\ (m)'},'Interpreter','latex','FontName','Times New Roman');
+        c = colorbar;
+        c.Label.String = '$\rm Wind\ Speed\ (ms^{-1})$';
+        c.Label.Interpreter = 'latex';
+        c.TickLabelInterpreter = 'latex';
+        set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
+            'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
+            'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
+        grid off
+        title(['Average wind speed and direction at ' site ' on ' datestr(Alldata.time(1),'dd-mmm-yyyy')],'Fontsize',14,'Interpreter','latex')
+        legend(["$\rm Wind\ Speed\ Contours\ (0.5\ ms^{-1}) $", "$\rm Wind\ Direction (degrees) $"],'Interpreter','Latex','Location','Best','Orientation','Vertical','EdgeColor','w','FontSize',14)
+
+        subplot(2,1,2)
+        plot(Alldata.Range,nanmean(Alldata.Avail),'LineWidth',2,'color','r')
+        set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
+            'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
+            'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
+        grid on
+        xlabel({'$\rm Height\ ASL\ (m)$'},'Interpreter','latex','FontName','Times New Roman');
+        ylabel({'$\rm Availability\ (\%)$'},'Interpreter','latex','FontName','Times New Roman');
+        legend(["$\rm Lidar\ Data\ Availability $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
+
+        if(direc_move ~= 'x')
+            disp(['Moving the Lidar files to archive for ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+            % Move the processed data into an Archive Folder on Lidar-buoy share drive
+            direc_lid_file = [direc_lidar direc_lidar_sta(ind_lid).name]; % Move the 7zip files sta files
+            movefile(direc_lid_file,[direc_move 'Lidar\']);
+        end
+
+        if(direc_move ~= 'x')
+            % Also move the stdsa, rtd, stdsta
+            direc_lid_file_stdsta = [file_lid_7z(1:end-6) 'stdsta.7z'];
+            movefile(direc_lid_file_stdsta,[direc_move 'Lidar\']);
+
+            direc_lid_file_rtd = [file_lid_7z(1:end-6) 'rtd.7z'];
+            movefile(direc_lid_file_rtd,[direc_move 'Lidar\']);
+
+            direc_lid_file_rtd = [file_lid_7z(1:end-6) 'stdrtd.7z'];
+            movefile(direc_lid_file_rtd,[direc_move 'Lidar\']);
+        end
+
+        try
+            % delete the unzipped sta files
+            delete(file_lid_7z(1:end-3));
+        catch
+            laster
+        end
+
+        disp(['Saving the Lidar Winds & Direction figure from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+
+        % Save the figure
+        fig_filename = [OutputDir direc_lidar_sta(ind_lid).name(1:end-3) '.Winds.Direction.Availability.jpg'];
+        saveas(gcf,fig_filename,'jpeg')
+        close(gcf)
+
+
+        % Plot the time series WS at select heights (Time x Height)
+        figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
+        r1 = find(Alldata.Range == 40);
+        r2 = find(Alldata.Range == 90);
+        r3 = find(Alldata.Range == 140);
+        r4 = find(Alldata.Range == 200);
+
+        plot(Alldata.time,Alldata.Vh(:,[r1 r2 r3 r4]),'Linewidth',2)
+
+        set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
+            'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
+            'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
+        datetick('x','yyyy-mm-dd HH:MM')
+        xlabel({'$\rm UTC\ Time\ $'},'Interpreter','latex','FontName','Times New Roman');
+        ylabel({'$\rm Wind\ Speed\ (ms^{-1})$'},'Interpreter','latex','FontName','Times New Roman');
+        set(gcf,'color','white')
+        legend(["$\rm 40\ m\ $" "$\rm 90\ m\ $" "$\rm 140\ m\ $" "$\rm 200\ m\ $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
+
+    %     yyaxis right
+    %     plot(Alldata.time,Alldata.Dir(:,[r1 r2 r3 r4]),'--','Linewidth',2)
+    %     ylabel({'$\rm Wind\ Direction\ (deg)$'},'Interpreter','latex','FontName','Times New Roman');
+    %     legend(["$\rm 40\ m\ $" "$\rm 90\ m\ $" "$\rm 140\ m\ $" "$\rm 200\ m\ $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
+        disp(['Saving the Figure Winds at offshore Hub-height from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+
+        % Save the figure
+        fig_filename = [OutputDir direc_lidar_sta(ind_lid).name(1:end-3) '.Winds.Hub.Heights.jpg'];
+        saveas(gcf,fig_filename,'jpeg')
+        close(gcf)
+    catch
+       disp('Cannot Unzip the file, make sure the 7zip executable directory link is correct.') 
+    end
 else
     disp(['No Lidar dataset available on - ' datestr(idate)]) 
 end
@@ -768,7 +770,7 @@ end
 direc_gnss_bin = dir([direc_buoy '*.gnss.bin']);
 direc_imu_bin = dir([direc_buoy '*.imu.bin']);
 warning off
-
+date_gnss_mat = [];
 % Pick the file
 for i = 1:length(direc_gnss_bin)
     ind_gnss = find(direc_gnss_bin(i).name == '.');
@@ -869,11 +871,11 @@ else
 end % if statement
 
 
-% GPS plots
+%% GPS plots
 % Plot the lidar data
 direc_gps = dir([direc_buoy '*.gps.csv']);
 warning off
-
+date_gps_mat = [];
 % Pick the file
 for i = 1:length(direc_gps)
     ind_gps = find(direc_gps(i).name == '.');

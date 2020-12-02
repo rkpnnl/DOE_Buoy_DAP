@@ -24,7 +24,7 @@ opts = delimitedTextImportOptions("NumVariables", 8);
 
 % Specify range and delimiter
 opts.DataLines = dataLines;
-opts.Delimiter = ["'", "/", "="];
+opts.Delimiter = ["'", "-", "="];
 
 % Specify column names and types
 opts.VariableNames = ["direc_lidar", "VarName2", "name", "month", "day", "Var6", "Var7", "Var8"];
