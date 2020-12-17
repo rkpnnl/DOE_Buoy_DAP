@@ -381,10 +381,10 @@ if(~isempty(ind_waves))
 
     figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
     subplot(3,1,1)
-    plot(Waves.Datetime,Waves.Havg,'LineWidth',2)
+    plot(Waves.Datetime,Waves.Havg,'LineWidth',2,'color','c')
     hold on
-    plot(Waves.Datetime,Waves.Hsig,'LineWidth',2)
-    plot(Waves.Datetime,Waves.Hmax,'LineWidth',2)
+    plot(Waves.Datetime,Waves.Hsig,'LineWidth',2,'color','k')
+    plot(Waves.Datetime,Waves.Hmax,'LineWidth',2,'color',[0 0 0]+0.5)
     title(['Average Wave statistics at ' site],'Fontsize',14,'Interpreter','latex')
     colormap(brewermap([],'*spectral'))
     ylabel("$\rm Wave\ H\ (m) $",'Interpreter','Latex')
@@ -396,9 +396,9 @@ if(~isempty(ind_waves))
     set(gcf,'color','white')
 
     subplot(3,1,2)
-    plot(Waves.Datetime,Waves.Tavg,'LineWidth',2)
+    plot(Waves.Datetime,Waves.Tavg,'LineWidth',2,'color','m')
     hold on
-    plot(Waves.Datetime,Waves.Tsig,'LineWidth',2)
+    plot(Waves.Datetime,Waves.Tsig,'LineWidth',2,'color','g')
 
     ylabel("$\rm Wave\ T\ (secs) $",'Interpreter','Latex')
 
@@ -472,7 +472,7 @@ if(~isempty(ind_cond))
     yyaxis right
     plot(coductivity.Datetime,coductivity.SurfaceTemperatureC,'LineWidth',2)
     ylabel("$\rm SST\ (^o C) $",'Interpreter','Latex')
-    title(['Average Ocean Conductivity and temprature estimates at ' site],'Fontsize',14,'Interpreter','latex')
+    title(['Average Ocean conductivity and temperature measurements at ' site],'Fontsize',14,'Interpreter','latex')
     xlabel("UTC Time",'Interpreter','Latex')
     set(gcf,'color','white')
     legend(["$\rm Conductivity (S\ m^{-1})$" "$\rm \bar SST\ (^o C) $"],'Interpreter','Latex','Location','Best','Orientation','Horizontal','EdgeColor','w','FontSize',14)
@@ -543,7 +543,7 @@ if(~isempty(ind_curr))
     
     
     figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
-    subplot(2,1,1)
+    ax(1) = subplot(2,1,1);
     pcolor(currents.Datetime,-Range(1,:),currents.vel')
     c = colorbar;
     c.Label.String = '$\rm Current\ Velocity\ (mm\ s^{-1})$';
@@ -554,13 +554,14 @@ if(~isempty(ind_curr))
     title(['Average Ocean Current Velocity and Direction at ' site],'Fontsize',14,'Interpreter','latex')
     xlabel("UTC Time",'Interpreter','Latex')
     set(gcf,'color','white')
-    
+    colormap(ax(1),brewermap([],'*spectral'))
+    caxis([0 700]);
      set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
     'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','in',...
     'TickLabelInterpreter','latex','XMinorTick','off','YMinorTick','off','XGrid','on','XMinorGrid','off','YGrid','on','YMinorGrid','off');
-    legend(["$\rm Current\ Velocity\ (mm\ s^{-1})$"],'Interpreter','Latex','Location','southwest','Orientation','Horizontal','EdgeColor','w','FontSize',14)
+%     legend(["$\rm Current\ Velocity\ (mm\ s^{-1})$"],'Interpreter','Latex','Location','southwest','Orientation','Horizontal','EdgeColor','w','FontSize',14)
     
-    subplot(2,1,2)
+    ax(2) = subplot(2,1,2);
     pcolor(currents.Datetime,-Range(1,:),currents.direc')
     
     c = colorbar;
@@ -570,13 +571,13 @@ if(~isempty(ind_curr))
     shading flat
     ylabel("$\rm Depth\ (m) $",'Interpreter','Latex')
     xlabel("UTC Time",'Interpreter','Latex')
-    colormap('HSV')
-    
+    colormap(ax(2),'HSV')
+    caxis([0 360]);
      set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
     'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','in',...
     'TickLabelInterpreter','latex','XMinorTick','off','YMinorTick','off','XGrid','on','XMinorGrid','off','YGrid','on','YMinorGrid','off');
     
-    legend(["$\rm Current\ Direction\ (degrees)$"],'Interpreter','Latex','Location','southwest','Orientation','Horizontal','EdgeColor','w','FontSize',14)
+%     legend(["$\rm Current\ Direction\ (degrees)$"],'Interpreter','Latex','Location','southwest','Orientation','Horizontal','EdgeColor','w','FontSize',14)
     
     disp(['Moving the Ocean Currents file to archive from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
     if(direc_move ~= 'x')  
@@ -668,7 +669,7 @@ if(~isempty(ind_lid))
     %     yticklabs = cellstr(num2str(Alldata.Range));
         set(gca,'ytick',linspace(0,2,nLabelsY),'yticklabels',Alldata.Range(1:2:end)) %{yticklabs{1:1:end}})
         set(gca,'xtick',linspace(0,0.8696,6),'xticklabels',sprintfc('%g',[0:4:23]))
-        caxis([0 15]);
+        caxis([0 20]);
         xlabel({'UTC\ Hour\ of\ the\ Day'},'Interpreter','latex','FontName','Times New Roman');
         set(gcf,'color','white')
         ylabel({'Height\ ASL\ (m)'},'Interpreter','latex','FontName','Times New Roman');
@@ -733,7 +734,7 @@ if(~isempty(ind_lid))
         r2 = find(Alldata.Range == 90);
         r3 = find(Alldata.Range == 140);
         r4 = find(Alldata.Range == 200);
-
+        
         plot(Alldata.time,Alldata.Vh(:,[r1 r2 r3 r4]),'Linewidth',2)
 
         set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
@@ -778,7 +779,7 @@ for i = 1:length(direc_gnss_bin)
     % convert to matlab time
     date_gnss_mat(i) = datenum(str2num(date_gnss(1:4)),str2num(date_gnss(5:6)),str2num(date_gnss(7:8)),0,0,0);
 end
-
+clear i
 if(~isempty(date_gnss_mat))
     ind_imu = find(date_gnss_mat == idate); % These files are 30-min files - so should have atleast 24*2 files on a given day
 else
@@ -790,79 +791,85 @@ end
 if(~isempty(ind_imu))
 %     No_samples = [];Time = [];GNSS_all = [];
     for i = 1:length(ind_imu)
-        disp(['Reading the IMU/GNSS file ' num2str(i) '/' num2str(length(ind_imu))])
-        filename = direc_imu_bin(ind_imu(i)).name;
-        [IMU] = Read_IMU_bin([direc_buoy filename],site);
         
+        try
+            disp(['Reading the IMU/GNSS file ' num2str(i) '/' num2str(length(ind_imu))])
+            filename = direc_imu_bin(ind_imu(i)).name;
+            [IMU] = Read_IMU_bin([direc_buoy filename],site);
+            
 %         filename = direc_gnss_bin(ind_imu(i)).name;
 %         [GNSS] = Read_GNSS_bin([direc_buoy filename]);
         
-        % Plot the histogram of Pitch, Roll
-        figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
-        histogram(IMU.rpy(:,1)*180/pi,'DisplayStyle','stairs','FaceAlpha',0.5,'EdgeColor','k','LineStyle','-', 'LineWidth',2)
-        hold on
-        histogram(IMU.rpy(:,2)*180/pi,'DisplayStyle','stairs','FaceAlpha',0.5,'EdgeColor','r','LineStyle','-', 'LineWidth',2)
-        
-        set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
-        'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
-        'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
-        xlabel({'$\rm Buoy\ Motion\ (deg)$'},'Interpreter','latex','FontName','Times New Roman');
-        ylabel({'$\rm PDF\ $'},'Interpreter','latex','FontName','Times New Roman');
-        set(gcf,'color','white')
-        grid on
-        roll_mean = nanmean(IMU.rpy(:,1)*180/pi);
-        pitch_mean = nanmean(IMU.rpy(:,2)*180/pi);
-        rlen = strcat('$\dot \theta_{roll} \ [deg, \bar \theta_{r} = ','',num2str(round(roll_mean*1000)/1000),' \ deg] $');
-        plen = strcat('$\dot \theta_{pitch} \ [deg, \bar \theta_{p} = ',num2str(round(pitch_mean*1000)/1000),' \ deg] $');
-        legend([ rlen, plen,""],'Interpreter','Latex','Location','Best','Orientation','vertical','EdgeColor','w','FontSize',12)
-        title({['Buoy Motion Histogram at ' site ' on ' datestr(IMU.mtime(1))], ""},'Fontsize',14,'Interpreter','latex')
-        
-        % Save the figure
-        fig_filename = [OutputDir direc_imu_bin(ind_imu(i)).name(1:end-4) '.roll.pitch.histogram.jpg'];
-        saveas(gcf,fig_filename,'jpeg')
-        close(gcf)
-        
-        
-        % Plot a sample time series of Roll & Pitch - first 1 min
-        
-        figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
-        k = length(IMU.mtime);
-        plot(IMU.mtime(1:k/10),IMU.rpy(1:k/10,1)*180/pi,'r-', 'LineWidth',2)
-        hold on
-        plot(IMU.mtime(1:k/10),IMU.rpy(1:k/10,2)*180/pi,'k-', 'LineWidth',2)
-        daterotatelabel('MM:SS',45)
-        
-        set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
-        'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','in',...
-        'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
-        xlabel({'','','$\rm UTC\ Time\ [MM:SS] $'},'Interpreter','latex','FontName','Times New Roman');
-        ylabel({'$\rm Buoy\ Motion\ [deg]$'},'Interpreter','latex','FontName','Times New Roman');
-        set(gcf,'color','white')
-        grid on
-        legend([ "$\dot \theta_{roll}$", "$\dot \theta_{pitch}$"],'Interpreter','Latex','Location','Best','Orientation','vertical','EdgeColor','w','FontSize',12)
-        title({['Sample Buoy Motion at ' site ' on ' datestr(IMU.mtime(1))]},'Fontsize',14,'Interpreter','latex')
-        
-        disp(['Saving the IMU figure from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+            % Plot the histogram of Pitch, Roll
+            figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
+            histogram(IMU.rpy(:,1)*180/pi,'DisplayStyle','stairs','FaceAlpha',0.5,'EdgeColor','k','LineStyle','-', 'LineWidth',2,'BinWidth',0.5)
+            hold on
+            histogram(IMU.rpy(:,2)*180/pi,'DisplayStyle','stairs','FaceAlpha',0.5,'EdgeColor','r','LineStyle','-', 'LineWidth',2,'BinWidth',0.5)
 
-        % Save the figure
-        fig_filename = [OutputDir direc_imu_bin(ind_imu(i)).name(1:end-4) '.roll.pitch.timeseries.jpg'];
-        saveas(gcf,fig_filename,'jpeg')
-        close(gcf)
-        
-%         % Keep track of sample count
-%         No_samples = [No_samples length(IMU.mtime)];
-%         Time = [Time IMU.mtime(1)];
-%         GNSS_all = [GNSS_all [GNSS.position(1,1),GNSS.position(1,2)]];
-        
-        % Move the data
-        if(direc_move ~= 'x')
-            % Move the processed data into an Archive Folder on Lidar-buoy share drive
-            direc_imu_file = [direc_buoy direc_imu_bin(ind_imu(i)).name]; % Move the 7zip files sta files
+            set(gca,'FontName','Times New Roman','FontSize',16,'FontWeight','bold',...
+            'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','out',...
+            'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
+            xlabel({'$\rm Buoy\ Motion\ (deg)$'},'Interpreter','latex','FontName','Times New Roman');
+            ylabel({'$\rm PDF\ $'},'Interpreter','latex','FontName','Times New Roman');
+            set(gcf,'color','white')
+            grid on
+            roll_mean = nanmean(IMU.rpy(:,1)*180/pi);
+            pitch_mean = nanmean(IMU.rpy(:,2)*180/pi);
+            rlen = strcat('$\dot \theta_{roll} \ [deg, \bar \theta_{r} = ','',num2str(round(roll_mean*1000)/1000),' \ deg] $');
+            plen = strcat('$\dot \theta_{pitch} \ [deg, \bar \theta_{p} = ',num2str(round(pitch_mean*1000)/1000),' \ deg] $');
+            legend([ rlen, plen,""],'Interpreter','Latex','Location','Best','Orientation','vertical','EdgeColor','w','FontSize',16)
+            title({['Buoy Motion Histogram at ' site ' on ' datestr(IMU.mtime(1))], ""},'Fontsize',16,'Interpreter','latex')
+            disp(['Saving the IMU Histogram figure ' num2str(i) '/' num2str(length(ind_imu))])
+            % Save the figure
+            fig_filename = [OutputDir direc_imu_bin(ind_imu(i)).name(1:end-4) '.roll.pitch.histogram.jpg'];
+            saveas(gcf,fig_filename,'jpeg')
+            close(gcf)
+
+
+%             % Plot a sample time series of Roll & Pitch - first 1 min
+% 
+%             figure('Renderer', 'painters', 'Position', [100 100 1200 600],'visible','off')
+%             k = length(IMU.mtime);
+%             plot(IMU.mtime(1:floor(k/10)),IMU.rpy(1:floor(k/10),1)*180/pi,'r-', 'LineWidth',2)
+%             hold on
+%             plot(IMU.mtime(1:floor(k/10)),IMU.rpy(1:floor(k/10),2)*180/pi,'k-', 'LineWidth',2)
+%             daterotatelabel('MM:SS',45)
+% 
+%             set(gca,'FontName','Times New Roman','FontSize',14,'FontWeight','bold',...
+%             'GridAlpha',0.1,'LineWidth',2,'MinorGridAlpha',0.2,'TickDir','in',...
+%             'TickLabelInterpreter','latex','XMinorTick','on','YMinorTick','on');
+%             xlabel({'','','$\rm UTC\ Time\ [MM:SS] $'},'Interpreter','latex','FontName','Times New Roman');
+%             ylabel({'$\rm Buoy\ Motion\ [deg]$'},'Interpreter','latex','FontName','Times New Roman');
+%             set(gcf,'color','white')
+%             grid on
+%             legend([ "$\dot \theta_{roll}$", "$\dot \theta_{pitch}$"],'Interpreter','Latex','Location','Best','Orientation','vertical','EdgeColor','w','FontSize',12)
+%             title({['Sample Buoy Motion at ' site ' on ' datestr(IMU.mtime(1))]},'Fontsize',14,'Interpreter','latex')
+% 
+%             disp(['Saving the IMU figure from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+% 
+%             % Save the figure
+%             fig_filename = [OutputDir direc_imu_bin(ind_imu(i)).name(1:end-4) '.roll.pitch.timeseries.jpg'];
+%             saveas(gcf,fig_filename,'jpeg')
+%             close(gcf)
+
+    %         % Keep track of sample count
+    %         No_samples = [No_samples length(IMU.mtime)];
+    %         Time = [Time IMU.mtime(1)];
+    %         GNSS_all = [GNSS_all [GNSS.position(1,1),GNSS.position(1,2)]];
+
+            % Move the data
+            if(direc_move ~= 'x')
+                % Move the processed data into an Archive Folder on Lidar-buoy share drive
+                direc_imu_file = [direc_buoy direc_imu_bin(ind_imu(i)).name]; % Move the 7zip files sta files
+
+                movefile(direc_imu_file,[direc_move 'Lidar\']);
+                direc_gnss_file = [direc_buoy direc_gnss_bin(ind_imu(i)).name]; % Move the 7zip files sta files
+                movefile(direc_gnss_file,[direc_move 'Lidar\']);
+                disp(['Moving the IMU file to Lidar archive ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+            end
             
-            movefile(direc_imu_file,[direc_move 'Lidar\']);
-            direc_gnss_file = [direc_buoy direc_gnss_bin(ind_imu(i)).name]; % Move the 7zip files sta files
-            movefile(direc_gnss_file,[direc_move 'Lidar\']);
-            disp(['Moving the IMU file to Lidar archive ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+        catch
+            disp(['Corrupted GX5-45 IMU dataset detected - ' filename])
         end
         
     end % for loop
