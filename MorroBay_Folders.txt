@@ -1,0 +1,6 @@
+direc_lidar = '/qfs/people/d3k077/matlab_a2e_raghu/exe/input_data/z06/lidar/' %'C:\Desktop\Buoy Lidar\Morro Bay\Lidar\'; % Location of the lidar data
+direc_buoy = '/qfs/people/d3k077/matlab_a2e_raghu/exe/input_data/z06/buoy/' % 'C:\Desktop\Buoy Lidar\Morro Bay\buoy\'; % Location of the Buoy data
+direc_move = 'x' % Move the data from local PC to server. Please enter 'x' if you don't want to move.
+OutputDir = '/qfs/people/kris439/exe/output_data/z06/' %'C:\Desktop\Buoy Lidar\Morro Bay\Figures\'; % Daily Figure Folders for each day
+zip_exe = '/usr/bin/7za'; %7zip file location
+process_date = '2020-12-01'; % Format -- year:month:day
