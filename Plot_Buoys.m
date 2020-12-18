@@ -1,14 +1,30 @@
 function [] = Plot_Buoys(direc_buoy, direc_lidar, direc_move,site, OutputDir, zip_exe, idate)
 
-% Plot the data from the Buoy and DL
+%% This function plots the data from the Buoy and lidar
+% Average Cup and Gill anemometer
+% Average RH and Pressure sensors
+% Average SST and Temperature
+% Average Conductivity and SST
+% Average Wave Signficant height, wave period
+% Average Ocean current profile from ADCP
+% Average Doppler Lidar profiles and time series at select heights
+% Histograms of Roll, and Pitch of the Buoy each hour from PNNL IMU
+% GPS location of the buoy
+
+% This code is used in Process_DAP_Buoy.m.
 
 % Inputs
-% direc_lidar = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\Lidar\';
-% direc_buoy = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\buoy\';
-% direc_move = 'Y:\Data\CA_deployment\buoy130_Morrobay\';
-% OutputDir = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\Figures\'; % Daily Figure Folders for each day
-% site - location of the buoy data
+% direc_lidar = '\Buoy Lidar\Morro Bay\DAP data\Lidar\';
+% direc_buoy = '\Buoy Lidar\Morro Bay\DAP data\buoy\';
+% direc_move = '\buoy130_Morrobay\';
+% OutputDir = '\Buoy Lidar\Morro Bay\DAP data\Figures\'; % Daily Figure Folders for each day
+% site - location of the buoy data : 'Morro Bay' or 'Humboldt'
 % idate = Date to be plotted (matlab format)
+
+
+% Written by Raghu Krishnamurthy, PNNL
+% Email: raghu@pnnl.gov
+
 warning off
 mkdir(OutputDir); % Create the director if does not exist
 
@@ -579,8 +595,9 @@ if(~isempty(ind_curr))
     
 %     legend(["$\rm Current\ Direction\ (degrees)$"],'Interpreter','Latex','Location','southwest','Orientation','Horizontal','EdgeColor','w','FontSize',14)
     
-    disp(['Moving the Ocean Currents file to archive from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
+    
     if(direc_move ~= 'x')  
+        disp(['Moving the Ocean Currents file to archive from ' site ' on ' datestr(idate,'yyyy/mm/dd')])
         % Move the processed data into an Archive Folder on Lidar-buoy share drive
         direc_curr_file = [direc_buoy dircon_curr(ind_curr).name];
         movefile(direc_curr_file,[direc_move 'buoy\']);

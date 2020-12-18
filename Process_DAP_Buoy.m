@@ -1,13 +1,22 @@
-% DAP Buoy data analysis
-%% Buoy 130 - Morro Bay
-% Inputs
-% Important note, make sure you run the DAP code to download the latest
-% data
+% This code processes the data as downloaded from the DAP for the Morro Bay
+% and Humboldt locations
 
-% direc_lidar = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\Lidar\'; % Location of the lidar data
-% direc_buoy = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\buoy\'; % Location of the Buoy data
-% direc_move = 'Y:\Data\CA_deployment\buoy130_Morrobay\'; % Move the data from local PC to server
-% OutputDir = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Morro Bay\DAP data\Figures\'; % Daily Figure Folders for each day - These need to be uploaded to DAP
+% Inputs
+% Two text files are used as inputs (MorroBay_Folders.txt and Humboldt.txt)
+% Please follow the steps to input the folder locations, date to process,
+% and location to process.
+
+% The code reads in the two text files in the opereating folder and processes the data requested
+% If no date is inputted into the text files, the code will look for any data avaialble the
+% previous day (For example, If Today is - Dec 18, 2020, the code will look
+% for any avaibale data on Dec 17, 2020).
+
+% Written by Raghu Krishnamurthy, PNNL
+% Email: raghu@pnnl.gov
+
+
+
+%% Buoy 130 - Morro Bay
 Folders = Read_folders('MorroBay_Folders.txt');
 direc_lidar = Folders.name{1};
 direc_buoy = Folders.name{2};
@@ -31,12 +40,6 @@ Plot_Buoys(direc_buoy, direc_lidar, direc_move,site, OutputDir, zip_exe, idate);
 
 
 %% Buoy 120 - Humboldt
-
-
-% direc_lidar = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Humboldt (120)\Lidar\'; % Location of the lidar data
-% direc_buoy = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Humboldt (120)\Buoy\'; % Location of the Buoy data
-% direc_move = 'Y:\Data\CA_deployment\buoy120_Humboldt\'; % Move the data from local PC to server
-% OutputDir = 'C:\Users\kris439\Desktop\Work\Lidar Buoy Science\Buoy Lidar\Humboldt (120)\Figures\'; % Daily Figure Folders for each day - These need to be uploaded to DAP
 Folders = Read_folders('Humboldt_Folders.txt');
 site = 'Humboldt'; % location of the buoy data
 
