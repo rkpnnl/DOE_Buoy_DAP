@@ -1,8 +1,8 @@
 function INFO=parsersta(filepath)
-% - Get informations in a .sta .stdsta file  
+% - Get all parameters in either .sta or .stdsta file  
 
 %==========================================================================
-% Get .sta .stdsta or .stacte file
+% Get .sta .stdsta files
 %==========================================================================
 
 if nargin==0
@@ -13,12 +13,12 @@ end
 
 
 %==========================================================================
-% Search informations in .sta .ctesta or .stacte file and construct INFO
+% Search for information in .sta .stdsta file and construct INFO structure
 %==========================================================================
 
-%===== Read file to string and get informations contained in first lines
-file_2_parse=fileread(filepath);                            % ??? to read file to string
-file_2_parse=file_2_parse(1:min(100000,size(file_2_parse,2)));                     % to capture only one part (<10000)
+%===== Read file to string and get information contained in header
+file_2_parse=fileread(filepath);                            % to read file to string
+file_2_parse=file_2_parse(1:min(100000,size(file_2_parse,2)));  % to capture only one part (<10000)
 
 %===== General informations
 exp='HeaderSize=(.)*?\n';
@@ -44,8 +44,7 @@ try
 end
 
 try
-    % exp='GPS Location=(.)*?N(.)*?E';
-    % txt=regexp(file_2_parse,exp,'tokens');
+    
     exp='Long:(.)*?°'; Long=regexp(file_2_parse,exp,'tokens');
     exp='Lat:(.)*?°'; Lat=regexp(file_2_parse,exp,'tokens');
     LongLat=[str2double(Long{:}) str2double(Lat{:})];
@@ -118,11 +117,9 @@ exp='Altitudes \(m\)=\t(.)*?\n';
 txt=regexp(file_2_parse,exp,'tokens');
 altitudes=regexp(txt{:},'\t','split');
 INFO.Range=str2double(altitudes{:});
-INFO.Range=INFO.Range(~isnan(INFO.Range));              % to be removed if an improvement exist for 
-                                                        % exp='Altitudes \(m\)=\t(.)*?\n';
-                                                        % txt=regexp(file_2_parse,exp,'tokens');
+INFO.Range=INFO.Range(~isnan(INFO.Range));
 
-%===== Time scale
+%===== Time Stamps
 exp='[\n]Timestamp(.)*[\n]*';
 txt=regexp(file_2_parse,exp,'match');
 txt=txt{:};
@@ -162,11 +159,6 @@ INFO.i_Disp=find(~cellfun(@isempty,Matches));
 
 Matches=regexpi(txts,'m Data Availability');
 INFO.i_Avail=find(~cellfun(@isempty,Matches));
-
-
-
-
-
 
 end
 

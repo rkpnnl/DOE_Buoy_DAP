@@ -1,30 +1,27 @@
 function [DATA]=sta2mat(filepath)
 
+% Converts the Leosphere STA format data to Matlab format
+
 if nargin==0
-    [flpth,pth]=uigetfile({'*.sta';'*.ctesta';'*.stacte'});
+    [flpth,pth]=uigetfile({'*.sta';'*.stdsta'});
     filepath=[pth,flpth];
 end
 
-
-
 %==========================================================================
-% Get informations (PARAMS) and reasults (data) of the measurement 
+% Get relevant paramters within the file and output the data
 %==========================================================================
 
-%===== Get information and results
+%===== Get lidar parameters and results
 PARAMS=parsersta(filepath);
 data=txt2mat(filepath,PARAMS.HeaderSize+2,'InfoLevel',0);
 
-%===== Deploye data
-
-% Get informations from PARAMS and delete unnecessary fields
+% Get parameters from PARAMS and delete unnecessary fields
 DATA=PARAMS;
-fields={'i_CNR','i_Vh','i_Dir','i_W','i_stdW','i_stdVh','i_minVh','i_maxVh','i_Disp','i_Avail','HeaderSize'}; DATA=rmfield(DATA,fields); clear fields
+fields={'i_CNR','i_Vh','i_Dir','i_W','i_stdW','i_stdVh','i_minVh','i_maxVh','i_Disp','i_Avail','HeaderSize'}; 
+DATA=rmfield(DATA,fields); 
+clear fields
 
 % Date and time
-% Year=data(:,1); Month=data(:,2); Day=data(:,3);
-% Hour=data(:,4); Minute=data(:,5); Second=zeros(size(data,1),1);
-% DATA.time=datenum(Year,Month,Day,Hour,Minute,Second);
 Year=data(:,1); Month=data(:,2); Day=data(:,3);
 Hour=data(:,4); Minute=data(:,5); Second=zeros(size(data,1),1);
 DATA.time=datenum(Year,Month,Day,Hour,Minute,Second);
@@ -48,10 +45,6 @@ DATA.TI=DATA.stdVh./DATA.Vh;
 
 DATA.Type_Scenario='DBS';
 DATA.Origine='sta';
-
-
-
-
 
 end
 
